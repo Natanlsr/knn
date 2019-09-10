@@ -4,6 +4,7 @@
 
 struct amostra{
     double *atributos;
+    double distancia;
 };
 
 typedef struct amostra Amostra;
@@ -51,6 +52,28 @@ Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at){
     return amostra;
 
 }
+double knn_cruzado(Amostra *amostra,int inicio,int fim,int n_vizinhos){
+    printf("%d,%d\n",inicio,fim);
+}
+
+double classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
+
+    int qtd_k = ceilf(q_am/k_fold);
+    int it = 0,inicio,fim; //indica qual iteracao do k-fold esta
+    printf("%d\n",qtd_k);
+
+    while(it<k_fold){
+        inicio = it * qtd_k; //Primeira posicao da amostra de teste
+        fim = inicio + qtd_k - 1; //ultima posicao
+        if(it+1 == k_fold){
+            fim = q_am-1;
+        }
+        knn_cruzado(amostra,inicio,fim,n_vizinhos);
+        it++;
+    }
+
+    return 0.0;
+}
 
 int main(){
 
@@ -70,6 +93,7 @@ int main(){
 
     amostras = lerArquivo(nm_arquivo,&qtd_amostra,&qtd_atributos);
 
+
     if(amostras == NULL){
         printf("Erro ao processar o arquivo das amostras");
         return -1;
@@ -77,7 +101,7 @@ int main(){
 
 
 
-
+    classificar(amostras,k_fold,n_vizinhos,qtd_amostra,qtd_atributos);
 
 
 
