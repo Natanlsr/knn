@@ -21,6 +21,19 @@ struct distancia{
 
 typedef struct distancia Distancia;
 
+int ordena(const void *a,const void *b){
+    double d1 = ((Metrica*)a)->distancia;
+    double d2 = ((Metrica*)b)->distancia;
+    if(d1 == d2)
+        return 0;
+    else
+        if(d1<d2)
+            return -1;
+        else
+            return 1;
+
+}
+
 Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at){
 
     FILE *arq;
@@ -96,11 +109,14 @@ Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int 
             }
             distancias[pos_calc].dados[pos_dis].distancia = sqrt(soma);
             distancias[pos_calc].dados[pos_dis].classe = amostra[i].atributos[j];//para nao perder classe da amostra
+
             pos_dis++;
         }
+        qsort(distancias[pos_calc].dados,qtd_distancias,sizeof(Metrica),ordena);
         pos_calc++;
 
     }
+
     return distancias;
 
 
@@ -111,9 +127,9 @@ Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int 
 double classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
 
     int qtd_k = ceilf(q_am/k_fold);
-    int it = 0,inicio,fim; //indica qual iteracao do k-fold esta,posicao inicial do grupo de teste,posicao final
+    int it = 0,inicio,fim,qtd_distancias,qtd_calc; //indica qual iteracao do k-fold esta,posicao inicial do grupo de teste,posicao final
     printf("%d\n",qtd_k);
-    Amostra *distancias;
+    Distancia *distancias;
 
     while(it<k_fold){
         inicio = it * qtd_k; //Primeira posicao da amostra de teste
@@ -121,7 +137,16 @@ double classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at
         if(it+1 == k_fold){
             fim = q_am-1;
         }
+        qtd_calc = (fim - inicio+1);
+        int qtd_distancias = q_am - qtd_calc;
         distancias = calcularDistancia(amostra,inicio,fim,q_am,q_at);
+        for(int i=0;i<qtd_calc ;i++){
+            printf("\n----------DISTANCIA DA AMOSTRA %d, em relacao as outras:----------\n",i+inicio);
+                for(int j =0;j<qtd_distancias;j++){
+
+                    printf("%f\n",distancias[i].dados[j]);
+                }
+        }
         it++;
     }
 
