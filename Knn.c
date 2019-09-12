@@ -78,19 +78,48 @@ Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at){
 
 }
 
-Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int qtd_atr){
+double calcularClasse(Metrica *distancias,int n_vizinhos,int qtd_dis){
 
-    printf("%d,%d\n",inicio,fim);
+    int classe_1 = 0;
+    int classe_2 = 0;
+    int classe_3 = 0;
+    for(int i =0;i<n_vizinhos;i++){
+        if(distancias[i].classe == 1.0){
+            classe_1++;
+        }
+
+        if(distancias[i].classe == 2.0){
+            classe_2++;
+        }
+        if(distancias[i].classe == 3.0){
+            classe_3++;
+        }
+    }
+
+        if(classe_1 > classe_2 && classe_1 > classe_3){
+
+            return 1.0;
+        }
+        if(classe_2 > classe_1 && classe_2 > classe_3){
+            return 2.0;
+        }
+        if(classe_3 > classe_1 && classe_3 > classe_2){
+            return 3.0;
+        }
+
+        return 0;
+
+}
+
+Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int qtd_atr){
 
     Distancia *distancias; //vetor com as distancias das amostras selecionadas para serem classificadas
     int total = (fim - inicio+1); //Quantidade de amostras
     int pos_dis,pos_calc,i,j;
     int qtd_distancias = qtd_am - total; //Quantidade de distacinas de cada amostra
     distancias = malloc(total * sizeof(Distancia));
-    printf("Total: %d\n",total);
     pos_calc = 0;
     for(int in = inicio;in<=fim;in++){
-        printf("Amostra: %d\n",in);
         distancias[pos_calc].dados = malloc(qtd_distancias*sizeof(Metrica));
         pos_dis = 0;
         for(i =0;i<qtd_am;i++){
@@ -109,7 +138,6 @@ Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int 
             }
             distancias[pos_calc].dados[pos_dis].distancia = sqrt(soma);
             distancias[pos_calc].dados[pos_dis].classe = amostra[i].atributos[j];//para nao perder classe da amostra
-
             pos_dis++;
         }
         qsort(distancias[pos_calc].dados,qtd_distancias,sizeof(Metrica),ordena);
@@ -124,10 +152,12 @@ Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int 
 
 }
 
-double classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
+int classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
 
     int qtd_k = ceilf(q_am/k_fold);
     int it = 0,inicio,fim,qtd_distancias,qtd_calc; //indica qual iteracao do k-fold esta,posicao inicial do grupo de teste,posicao final
+    int qtd_acertada = 0;
+    double classe;
     printf("%d\n",qtd_k);
     Distancia *distancias;
 
@@ -140,17 +170,23 @@ double classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at
         qtd_calc = (fim - inicio+1);
         int qtd_distancias = q_am - qtd_calc;
         distancias = calcularDistancia(amostra,inicio,fim,q_am,q_at);
-        for(int i=0;i<qtd_calc ;i++){
-            printf("\n----------DISTANCIA DA AMOSTRA %d, em relacao as outras:----------\n",i+inicio);
-                for(int j =0;j<qtd_distancias;j++){
+        for(int i=0;i<qtd_calc;i++){
+            classe = calcularClasse(distancias[i].dados,n_vizinhos,qtd_distancias);
+            printf("Classe calculada da amostra %d: %f\n",i+inicio,classe);
+            printf("Classe correta da amostra:%f\n",amostra[i+inicio].atributos[q_at]);
+            if(classe == amostra[i+inicio].atributos[q_at]){
+                printf("CERTO\n");
+                qtd_acertada++;
+            }
 
-                    printf("%f\n",distancias[i].dados[j]);
-                }
+
         }
+        printf("Quantidade acertada: %d\n",qtd_acertada);
         it++;
     }
 
-    return 0.0;
+
+    return qtd_acertada;
 }
 
 int main(){
