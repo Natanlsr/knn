@@ -113,6 +113,7 @@ double calcularClasse(Metrica *distancias,int n_vizinhos,int qtd_dis){
 
 Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int qtd_atr){
 
+    printf("%d,%d\n",inicio,fim);
     Distancia *distancias; //vetor com as distancias das amostras selecionadas para serem classificadas
     int total = (fim - inicio+1); //Quantidade de amostras
     int pos_dis,pos_calc,i,j;
@@ -171,27 +172,36 @@ int classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
         int qtd_distancias = q_am - qtd_calc;
         distancias = calcularDistancia(amostra,inicio,fim,q_am,q_at);
         for(int i=0;i<qtd_calc;i++){
-            classe = calcularClasse(distancias[i].dados,n_vizinhos,qtd_distancias);
+
+                //Diminuindo o vizinho caso seje necessario
+                for(int j=n_vizinhos;j>0;j--){
+                    classe = calcularClasse(distancias[i].dados,j,qtd_distancias);
+                    if(classe != 0.0)
+                        break;
+                }
+
+
+        /*
             printf("Classe calculada da amostra %d: %f\n",i+inicio,classe);
             printf("Classe correta da amostra:%f\n",amostra[i+inicio].atributos[q_at]);
+          */
+
             if(classe == amostra[i+inicio].atributos[q_at]){
-                printf("CERTO\n");
                 qtd_acertada++;
             }
 
 
         }
-        printf("Quantidade acertada: %d\n",qtd_acertada);
+
         it++;
     }
-
 
     return qtd_acertada;
 }
 
 int main(){
 
-    int qtd_amostra,qtd_atributos;
+    int qtd_amostra,qtd_atributos,acertos;
     int n_vizinhos,k_fold,z_score;
     char nm_arquivo[150];
     Amostra *amostras;
@@ -223,8 +233,9 @@ int main(){
 
 
 
-    classificar(amostras,k_fold,n_vizinhos,qtd_amostra,qtd_atributos);
-
+    acertos = classificar(amostras,k_fold,n_vizinhos,qtd_amostra,qtd_atributos);
+    double porcentagem = ((double)(acertos)/qtd_amostra)*100;
+    printf("Porcentagem de acertos: %.4lf%%",porcentagem);
 
 
 
