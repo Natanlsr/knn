@@ -33,6 +33,38 @@ int ordena(const void *a,const void *b){
             return 1;
 
 }
+Amostra* distribuirDados(Amostra *amostras,int qtd_amostras,int qtd_atributos){
+    int i=0,c1=0,c2=0,c3=0;
+    //Para um problema com 3 classes e amostras com classes proporcionais(mesma quantidade de cada classe)
+    int qtd_cada_classe = qtd_amostras / 3;
+
+    Amostra *classe1 = malloc(qtd_cada_classe * sizeof(Amostra));
+    Amostra *classe2 = malloc(qtd_cada_classe * sizeof(Amostra));
+    Amostra *classe3 = malloc(qtd_cada_classe * sizeof(Amostra));
+
+    for(i=0;i<qtd_amostras;i++){
+
+            if(amostras[i].atributos[qtd_atributos] == 1.0 )
+                classe1[c1++].atributos = amostras[i].atributos;
+
+            if(amostras[i].atributos[qtd_atributos] == 2.0 )
+                classe2[c2++].atributos = amostras[i].atributos;
+
+            if(amostras[i].atributos[qtd_atributos] == 3.0 )
+                classe3[c3++].atributos = amostras[i].atributos;
+
+    }
+    //Distribuindo amostras
+    int j = 0;
+    for(i=0;i<qtd_amostras;i+=3){
+        amostras[i].atributos = classe1[j].atributos;
+        amostras[i+1].atributos = classe2[j].atributos;
+        amostras[i+2].atributos = classe3[j++].atributos;
+    }
+    return amostras;
+
+}
+
 
 Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at){
 
@@ -73,6 +105,7 @@ Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at){
             }
         i++;
     }
+    amostra = distribuirDados(amostra,qtd_amostras,qtd_atributos);
 
     return amostra;
 
@@ -216,15 +249,15 @@ int main(){
     scanf("%d",&z_score);
 
     amostras = lerArquivo(nm_arquivo,&qtd_amostra,&qtd_atributos);
-    /*
+
     for(int i=0;i<qtd_amostra;i++){
         printf("AMOSTRA: %d\n",i);
-        for(int j=0;j<qtd_atributos;j++){
+        for(int j=0;j<=qtd_atributos;j++){
             printf("ATRIBUTO %d: %f\n",j,amostras[i].atributos[j]);
         }
         printf("-------------------------------------------------------\n");
     }
-    */
+
 
     if(amostras == NULL){
         printf("Erro ao processar o arquivo das amostras");
