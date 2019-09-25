@@ -181,9 +181,59 @@ Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int 
 
     return distancias;
 
+}
 
+Amostra* media(Amostra *amostras, int qtd_atr,int qtd_am){
 
+    Amostra *media = malloc(qtd_atr * sizeof(double));
+    int i,j;
+    //Soma dos atributos
+    for(i = 0; i < qtd_am; i++){
+        for(j = 0;j < qtd_atr;j++){
+            media.atributos[j] += amostras[i].atributos[j];
+        }
+    }
+    //se faz a média
+    for(i = 0;i < qtd_atr;i++){
+        media.atributos[i] /= qtd_am;
+    }
 
+    return media;
+}
+
+Amostra* desvio_padrao(Amostra *amostras, int qtd_atr, int qtd_am){
+
+    Amostra *devio = malloc(qtd_atr * sizeof(double));
+    int i,j;
+    //ja possuindo a media
+    Amostra *media = media(amostras,qtd_atr,qtd_am);
+
+    for(i = 0;i < qtd_am;i++){
+        for(j = 0;j < qtd_atr; j++){
+            desvio.atributos[j] += pow(amostras[i].atributos.[j] - media.atributos[j], 2);
+        }
+    }
+
+    for(i = 0;i < qtd_atr; i++){
+        desvio.atributos[i] = sqrt(desvio.atributos[i]/qtd_am);
+    }
+
+    return desvio;
+}
+
+Amostra* z_score(Amostra *amostras,int qtd_atr, int qtd_am){
+
+    int i,j;
+    Amostra *media = media(amostras,qtd_atr,qtd_am);
+    Amostra *desvio = desvio_padrao(amostras, qtd_atr, qtd_am);
+
+    for(i =0; i< qtd_am;i++){
+        for(j = 0; j< qtd_atr;j++){
+            amostras[i].atributos[j] = (amostras[i].atributos[j] - media[j])/desvio[j];
+        }
+    }
+
+    return amostras;
 }
 
 int classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
