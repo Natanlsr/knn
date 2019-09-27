@@ -183,39 +183,43 @@ Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int 
 
 }
 
-Amostra* media(Amostra *amostras, int qtd_atr,int qtd_am){
+double* media(Amostra *amostras, int qtd_atr,int qtd_am){
 
-    Amostra *media = malloc(qtd_atr * sizeof(double));
+    double *media = calloc(qtd_atr,sizeof(double));
     int i,j;
+
+
     //Soma dos atributos
     for(i = 0; i < qtd_am; i++){
         for(j = 0;j < qtd_atr;j++){
-            media.atributos[j] += amostras[i].atributos[j];
+            media[j] += amostras[i].atributos[j];
         }
     }
     //se faz a média
     for(i = 0;i < qtd_atr;i++){
-        media.atributos[i] /= qtd_am;
+        media[i] /= qtd_am;
     }
 
     return media;
 }
 
-Amostra* desvio_padrao(Amostra *amostras, int qtd_atr, int qtd_am){
+double* desvio_padrao(Amostra *amostras, int qtd_atr, int qtd_am){
 
-    Amostra *devio = malloc(qtd_atr * sizeof(double));
+    double *desvio = calloc(qtd_atr,sizeof(double));
     int i,j;
     //ja possuindo a media
-    Amostra *media = media(amostras,qtd_atr,qtd_am);
+
+    double *m;
+    m = media(amostras,qtd_atr,qtd_am);
 
     for(i = 0;i < qtd_am;i++){
         for(j = 0;j < qtd_atr; j++){
-            desvio.atributos[j] += pow(amostras[i].atributos.[j] - media.atributos[j], 2);
+            desvio[j] += pow(amostras[i].atributos[j] - m[j], 2);
         }
     }
 
     for(i = 0;i < qtd_atr; i++){
-        desvio.atributos[i] = sqrt(desvio.atributos[i]/qtd_am);
+        desvio[i] = sqrt(desvio[i]/qtd_am);
     }
 
     return desvio;
@@ -224,12 +228,12 @@ Amostra* desvio_padrao(Amostra *amostras, int qtd_atr, int qtd_am){
 Amostra* z_score(Amostra *amostras,int qtd_atr, int qtd_am){
 
     int i,j;
-    Amostra *media = media(amostras,qtd_atr,qtd_am);
-    Amostra *desvio = desvio_padrao(amostras, qtd_atr, qtd_am);
+    double *m = media(amostras,qtd_atr,qtd_am);
+    double *d = desvio_padrao(amostras, qtd_atr, qtd_am);
 
     for(i =0; i< qtd_am;i++){
         for(j = 0; j< qtd_atr;j++){
-            amostras[i].atributos[j] = (amostras[i].atributos[j] - media[j])/desvio[j];
+            amostras[i].atributos[j] = (amostras[i].atributos[j] - m[j])/d[j];
         }
     }
 
@@ -285,7 +289,7 @@ int classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at){
 int main(){
 
     int qtd_amostra,qtd_atributos,acertos;
-    int n_vizinhos,k_fold,z_score;
+    int n_vizinhos,k_fold,z;
     char nm_arquivo[150];
     Amostra *amostras;
 
@@ -296,9 +300,12 @@ int main(){
     printf("Digite o numero de particoes dos k-fold: ");
     scanf("%d",&k_fold);
     printf("Digite 1 caso queira normalizar ou 0 caso contrario: ");
-    scanf("%d",&z_score);
+    scanf("%d",&z);
 
     amostras = lerArquivo(nm_arquivo,&qtd_amostra,&qtd_atributos);
+
+    if(z == 1)
+        amostras = z_score(amostras,qtd_atributos,qtd_amostra);
 
     for(int i=0;i<qtd_amostra;i++){
         printf("AMOSTRA: %d\n",i);
