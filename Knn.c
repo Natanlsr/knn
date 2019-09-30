@@ -146,7 +146,7 @@ double calcularClasse(Metrica *distancias,int n_vizinhos,int qtd_dis){
 
 Distancia* calcularDistancia(Amostra *amostra,int inicio,int fim,int qtd_am,int qtd_atr){
 
-    printf("%d,%d\n",inicio,fim);
+    #printf("%d,%d\n",inicio,fim);
     Distancia *distancias; //vetor com as distancias das amostras selecionadas para serem classificadas
     int total = (fim - inicio+1); //Quantidade de amostras
     int pos_dis,pos_calc,i,j;
@@ -304,9 +304,15 @@ int main(){
 
     amostras = lerArquivo(nm_arquivo,&qtd_amostra,&qtd_atributos);
 
+    if(amostras == NULL){
+        printf("Erro ao processar o arquivo das amostras");
+        return -1;
+    }
+
     if(z == 1)
         amostras = z_score(amostras,qtd_atributos,qtd_amostra);
 
+        /*
     for(int i=0;i<qtd_amostra;i++){
         printf("AMOSTRA: %d\n",i);
         for(int j=0;j<=qtd_atributos;j++){
@@ -315,24 +321,15 @@ int main(){
         printf("-------------------------------------------------------\n");
     }
 
+    */
 
-    if(amostras == NULL){
-        printf("Erro ao processar o arquivo das amostras");
-        return -1;
-    }
+
 
 
 
     acertos = classificar(amostras,k_fold,n_vizinhos,qtd_amostra,qtd_atributos);
     double porcentagem = ((double)(acertos)/qtd_amostra)*100;
     printf("Porcentagem de acertos: %.4lf%%",porcentagem);
-
-
-
-
-
-
-
 
 
 
