@@ -34,34 +34,72 @@ int ordena(const void *a,const void *b){
             return 1;
 
 }
-Amostra* distribuirDados(Amostra *amostras,int qtd_amostras,int qtd_atributos){
-    int i=0,c1=0,c2=0,c3=0;
-    //Para um problema com 3 classes e amostras com classes proporcionais(mesma quantidade de cada classe)
-    int qtd_cada_classe = qtd_amostras / 3;
+Amostra* distribuirDados(Amostra *amostras,int qtd_amostras,int qtd_atributos, int qtd_c){
 
-    Amostra *classe1 = malloc(qtd_cada_classe * sizeof(Amostra));
-    Amostra *classe2 = malloc(qtd_cada_classe * sizeof(Amostra));
-    Amostra *classe3 = malloc(qtd_cada_classe * sizeof(Amostra));
+    int qtd_cd_classe = ceilf(qtd_amostras/qtd_c);
+    Amostra **clas= malloc(qtd_c*sizeof(Amostra*));
 
-    for(i=0;i<qtd_amostras;i++){
+    for(int i =0;i<qtd_c;i++){
+        clas[i] = malloc(qtd_cd_classe*sizeof(Amostra));
+    }
+    int cl_atual = 1,pos=0,j;
+    for(int i =0;i<qtd_amostras;i++){
+        j = amostras[i].classe - 1;
+        if(i%qtd_cd_classe == 0)
+            pos = 0;
+        //printf("%d,%d\n",j,pos);
+        clas[j][pos].atributos = amostras[i].atributos;
+        clas[j][pos++].classe = amostras[i].classe;
 
-            if(amostras[i].atributos[qtd_atributos] == 1.0 )
-                classe1[c1++].atributos = amostras[i].atributos;
-
-            if(amostras[i].atributos[qtd_atributos] == 2.0 )
-                classe2[c2++].atributos = amostras[i].atributos;
-
-            if(amostras[i].atributos[qtd_atributos] == 3.0 )
-                classe3[c3++].atributos = amostras[i].atributos;
 
     }
+
+    pos = 0;//qual classe
+    int *pos_cal = calloc(qtd_amostras,sizeof(int));
     //Distribuindo amostras
-    int j = 0;
-    for(i=0;i<qtd_amostras;i+=3){
-        amostras[i].atributos = classe1[j].atributos;
-        amostras[i+1].atributos = classe2[j].atributos;
-        amostras[i+2].atributos = classe3[j++].atributos;
+
+    for(int i =0;i<qtd_amostras;i++){
+        if(i%qtd_c == 0)
+            pos = 0;
+        printf("%d,%d\n",pos,pos_cal[pos]);
+        amostras[i].atributos = clas[pos][pos_cal[pos]].atributos;
+        amostras[i].classe = clas[pos][pos_cal[pos]++].classe;
+        pos++;
     }
+
+/*
+
+    int *pos_calculadas = calloc(qtd_amostras,sizeof(int));
+    Amostra aux;
+    int i,r=0,pos,j=1;
+    for(i=1;i<qtd_amostras;i++){
+        if(i%10 != 0 && pos_calculadas[i] == 0){
+            //for(;j<qtd_c;j++){
+                pos = ((j) * qtd_c)+r;
+                if(pos > qtd_amostras -1)
+                {
+                    continue;
+                }
+                printf("%d,%d\n",pos,i);
+                printf("Classe atual:%d\d\n",amostras[i].classe);
+                printf("Classe Nova: %d\n",amostras[pos].classe);
+                aux = amostras[pos];
+                amostras[pos] = amostras[i];
+                amostras[i] = aux;
+                pos_calculadas[i] = 1;
+                pos_calculadas[pos] = 1;
+            //}
+
+        }else{
+            r++;
+            j = 1;
+        }
+        j++;
+
+    }
+
+
+*/
     return amostras;
 
 }
@@ -85,7 +123,7 @@ Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at, int *q_c){
     }
 
     fscanf(arq,"%d%d",&qtd_amostras,&qtd_atributos);
-    printf("%d,%d\n",qtd_amostras,qtd_atributos);
+    //printf("%d,%d\n",qtd_amostras,qtd_atributos);
     atributos = malloc(qtd_atributos+1 * sizeof(double));
     amostra = malloc(qtd_amostras * sizeof(Amostra));
     total = qtd_atributos+1;
@@ -113,7 +151,7 @@ Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at, int *q_c){
     }
     fclose(arq);
     *q_c = amostra[a-1].classe;
-    //amostra = distribuirDados(amostra,qtd_amostras,qtd_atributos);
+    amostra = distribuirDados(amostra,qtd_amostras,qtd_atributos,amostra[a-1].classe);
 
     return amostra;
 
@@ -126,7 +164,7 @@ int calcularClasse(Metrica *distancias,int n_vizinhos,int qtd_dis,int qtd_classe
 
         for(i =0;i<n_vizinhos;i++){
             pos = distancias[i].classe - 1;
-            printf("Classe: %d\n",distancias[i].classe);
+            //printf("Classe: %d\n",distancias[i].classe);
             classes[pos]++;
         }
 
@@ -145,7 +183,7 @@ int calcularClasse(Metrica *distancias,int n_vizinhos,int qtd_dis,int qtd_classe
         }
 
         if(empate == n_vizinhos)
-            i = -1;
+            maior = -1;
 
         return maior+1;
 
@@ -276,8 +314,8 @@ int classificar(Amostra *amostra,int k_fold, int n_vizinhos,int q_am,int q_at, i
 
 
 
-            printf("Classe calculada da amostra %d: %d\n",i+inicio,classe);
-            printf("Classe correta da amostra:%d\n",amostra[i+inicio].classe);
+            //printf("Classe calculada da amostra %d: %d\n",i+inicio,classe);
+            //printf("Classe correta da amostra:%d\n",amostra[i+inicio].classe);
 
 
             if(classe == amostra[i+inicio].classe){
@@ -321,7 +359,7 @@ int main(){
 
     int j;
 
-    /*
+
     for(int i=0;i<qtd_amostra;i++){
         printf("AMOSTRA: %d\n",i);
         for(j=0;j<qtd_atributos;j++){
@@ -330,7 +368,7 @@ int main(){
         printf("Classe: %d\n",amostras[i].classe);
         printf("-------------------------------------------------------\n");
     }
-    */
+
 
 
 
