@@ -61,7 +61,7 @@ Amostra* distribuirDados(Amostra *amostras,int qtd_amostras,int qtd_atributos, i
     for(int i =0;i<qtd_amostras;i++){
         if(i%qtd_c == 0)
             pos = 0;
-        printf("%d,%d\n",pos,pos_cal[pos]);
+        //printf("%d,%d\n",pos,pos_cal[pos]);
         amostras[i].atributos = clas[pos][pos_cal[pos]].atributos;
         amostras[i].classe = clas[pos][pos_cal[pos]++].classe;
         pos++;
@@ -159,31 +159,49 @@ Amostra* lerArquivo(char *nm_arquivo,int *q_a, int *q_at, int *q_c){
 
 int calcularClasse(Metrica *distancias,int n_vizinhos,int qtd_dis,int qtd_classes){
 
-        int *classes = calloc(qtd_classes,sizeof(int));
-        int pos,i;
 
+        if(n_vizinhos == 1){
+            return distancias[0].classe;
+        }
+        int *classes = calloc(qtd_classes,sizeof(int));
+        int pos,i, p =0;
+        //printf("Numero de vizinhos: %d\n",n_vizinhos);
         for(i =0;i<n_vizinhos;i++){
+
+
             pos = distancias[i].classe - 1;
             //printf("Classe: %d\n",distancias[i].classe);
             classes[pos]++;
+            if(i == 0)
+                p = pos;
+
         }
 
-        int maior = pos,empate = 0;
+        int maior = p,empate = 0, repe = classes[pos];
 
-        for(i=1;i<qtd_classes;i++){
-            if(classes[i] != 0){
+        //PRimeiro verificar se tem empate
+        for(i=0;i<qtd_classes;i++){
+            if(classes[i]!=0){
+                if(repe == classes[i])
+                    empate++;
+            }
+        }
+
+        //printf("EMpate: %d\n",empate);
+        if(empate == n_vizinhos)
+            return 0;
+
+        for(i=0;i<qtd_classes;i++){
+            if(classes[i] != 0 && i!= p){
+                //printf("%d,%d\n",classes[i],classes[maior]);
                 if(classes[i] > classes[maior])
                 {
                     maior = i;
-                }else{
-                    if(classes[i] == classes[maior])
-                        empate++;
                 }
             }
         }
 
-        if(empate == n_vizinhos)
-            maior = -1;
+
 
         return maior+1;
 
@@ -359,7 +377,7 @@ int main(){
 
     int j;
 
-
+/*
     for(int i=0;i<qtd_amostra;i++){
         printf("AMOSTRA: %d\n",i);
         for(j=0;j<qtd_atributos;j++){
@@ -368,7 +386,7 @@ int main(){
         printf("Classe: %d\n",amostras[i].classe);
         printf("-------------------------------------------------------\n");
     }
-
+*/
 
 
 
